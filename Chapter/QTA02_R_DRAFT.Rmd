@@ -1,0 +1,367 @@
+# 2 Using R for Text Analysis 
+
+
+## Getting started 
+A massive variety of software to analyse text is now available (Ignatow and Mihalcea 2017; Silge and Robinson 2017). We will rely on the combination of R, RStudio and quanteda as our workhorse for QTA. The free and user-community driven R is the statistical programming software of choice. RStudio is a specialized editor "on steroids" for R, facilitating its use. Quanteda (Benoit et al. 2018) is a R package for quantitative text analysis with multiple cutting-edge text analysis functions and again a lively community behind it, constantly pursuing its development in the open. Why choose these three if there so many alternatives out there? 
+
+A huge advantage of R is its open source nature. Contributions are welcome, possible and transparent (Munzert 2014: 213). R has been around for a while, has a solid base, but is also popular in scientific and economic communities. RStudio is the working environment of choice for many R users. This has good reasons, as the IDE (integrated development environment) does more than just provide an editor for R, but the company going by the same name delivers a range of software for the R statistical computing environment. This includes for instance markdown, knitr, tidyverse or ggplot2 packages, which allow for intuitive data handling, visualization, and reporting. Finally, while there are other R packages, quanteda is the bandwagon to follow for quantitative text analysis in R (Welbers et al. 2017). In this book, we will also occasionally rely on further software. Calling Python from R is now not far-fetched, and Chapter 3 handles the 'reticulate()' package to do so. For now, the steps involved to get started with our QTA triplet are: 
+
+1. Install [R from (CRAN)](https://cran.r-project.org/)
+2. Install [RStudio](https://www.rstudio.com/)
+3. Install [quanteda](https://quanteda.io/)
+
+If you are using Windows, you also need to install [RTools](https://cran.r-project.org/bin/windows/Rtools/) for quanteda to run. Assuming that R and RStudio are installed, the installation of quanteda is triggered by: 
+
+```{r quanteda install, eval=FALSE, echo=TRUE}
+packages.install(quanteda)
+```
+
+Then, quanteda is loaded into the R "library", which means that it is available in the current session: 
+
+```{r quanteda library, eval=TRUE, echo=TRUE, warning=FALSE}
+library(quanteda)
+```
+
+To call the R documentation for quanteda <!-- to get more information about the package -->: 
+
+```{r quanteda help, eval=FALSE, echo=TRUE}
+?quanteda
+```
+
+Now we are ready to go! The subsequent sections first introduce ´tidyverse´ and ´quanteda´. Then, we learn about text analysis in R via an increasingly popular path, the `tidyverse` paradigm. The remainder of the chapter is devoted to our main framework, the `quanteda` text analysis package. 
+
+
+## The tidyverse paradigm and QTA 
+"R is an old language, and some things that were useful 10 or 20 years ago now get in your way" (Wickham and Grolemund 2017: 119). Reflecting that R has been developed out of the programming language S by Ross Ihaka and Robert Gentleman since the 1990s and is evolving as it grows older, developers such as RStudio's Hadley Wickham and colleagues have formulated the "tidyverse" paradigm (Wickham 2014). Accordingly, text data is organized as "a table with one token per row", or more generally that "each variable is a column", "each observation" is a row, and "each type observational unit is a table" (Silge and Robinson 1; Wickham 2014: [XX]). This is very much an intuitive idea of a data frame, which is often not met in real-world situations. And the traditional data frame in R does outdated things such as converting strings into factors, which can be annoying. In short, "[t]he packages in the tidyverse share a common philosophy of data and R programming, and are designed to work together naturally" (Wickham and Grolemund 2017: xvi). To be sure, `tidyverse` does not replace R, but provides a number of functions aimed at making life easier in R.
+
+Tidyverse is also an R package set which comes with `ggplot2` for data visualisation, `dplyr` for data manipulation, `tidyr` for data tidying, `readr` for data import, `purrr` for functional programming, `tibble` for tibbles (trimmed data frames), `stringr` for strings and `forcats` for factors. For instance, data frames come as "tibbles", which according to `vignette(tibble)` represents "a modern take on data frames. They keep the features that have stood the test of time, and drop the features that used to be convenient but are now frustrating (i.e. converting character vectors to factors)". `?tibble` jumps in stating that it "[n]ever coerces inputs (i.e. strings stay as strings!)"
+
+Tidyverse can be thought of as a galaxy in the R universe where everything is neat and communicates nicely with each other. This also excludes some things, including certain tools of textual analysis, and there are limitations of using tidy data along with quanteda. Still, the tidyverse philosophy is intriguing, and the book "Text Mining with R" by Julia Silge and David Robinson treats quantitative text analysis from the tidyverse standpoint. We will later choose a different approach, centring on the R and quanteda as a powerful environment for textual analysis while integrating the tidyverse paradigm where it is useful, for instance plotting results with `ggplot2()`. 
+
+
+## Philosophy, functions and features in quanteda 
+The quanteda philosophy rests on several  pillars, including analytical soundness, intuitive use, and speed. Analytical soundness is represented by the efforts of the developer team, for instance reflected in [this thread](https://stackoverflow.com/questions/54427001/naive-bayes-in-quanteda-vs-caret-wildly-different-results) on the dedicated stackoverflow discussion page, where Ken Benoit answers a question on Naive Bayes estimation in quanteda, arguing that the results differ from other because quanteda relies on "a more text-appropriate multinomial distribution". The intuitive use of quanteda is exemplified by the fact that base R functions are used or mimicked where possible, such as 'summary()'. Speed and efficiency are represented for instance by allowing for parallel computing. 
+
+*Quanteda* features a wide range of functions, allowing users to perform a wide range of text manipulation and analysis tasks. The functions (see the [quanteda website](http://quanteda.io/reference/index.html) for an overview) are divided into the areas "package-level", "data", "corpus functions", "tokens functions", "character functions", "text matrix functions", "text statistics", "dictionary functions", "phrase discovery functions", "text model functions", "text plot functions", "utility functions" and "miscellaneous functions". While it is neither feasible  nor adequate to describe all of them in detail here, a few of the core functions are introduced using the running example of books by Mark Twain. 
+
+```{r sup_tab, echo=FALSE, results='asis'}
+row2 <- c("package-level","quanteda_options()","sets global options")
+row3 <- c("data","data_char_ukimmig2010","election manifesto text extracts")
+row4 <- c("corpus functions","corpus()","creates a text corpus")
+row5 <- c("tokens functions","tokens()","tokenize texts")
+row6 <- c("character functions","tokens_ngram()","create ngrams")
+row7 <- c("text matrix functions","dfm()","creates a documment-feature matrix")
+row8 <- c("text statistics","textstat_simil()","similarity between texts")
+row9 <- c("dictionary functions","dictionary()","creates a dictionary")
+row10 <- c("phrase discovery functions","kwic()","shows keywords in context")
+row11 <- c("txt model functions","textmodel_wordfish()","computes the Wordfish model")
+row12 <- c("text plot functions","textplot_keyness()","plots word keyness")
+row13 <- c("utility functions","featnames()","retrieves feature labels from a dfm")
+row14 <- c("miscellaneous functions","convert()","converts quanteda dfm objects")
+suptab <- as.data.frame(rbind(row2,row3,row4,row5,row6,row7,row8,row9,row10,row11,row12,row13,row14))
+rownames(suptab) <- NULL
+library(knitr)
+kable(suptab, caption = "Examples of quanteda functions in different areas", col.names=c("Area","Example function","Use"))
+```
+
+The incomplete overview shows that quanteda lets us do most of the things with text we could ask for. The example function at the package level demonstrated is `quanteda_options()`. It can set options for printing and naming as well as, shown here, setting the number of threads used for parallel computing, reflecting part of the quanteda philosophy aiming at speed: 
+
+```{r quanteda , eval=TRUE, echo=TRUE, comment=FALSE}
+quanteda_options("threads")
+```
+
+This tells us that 2 threads are used, and we could set the number to say 4 with 'quanteda_options(threads = 4)'.  In the subsequent paragraphs, other exemplary functions are illustrated using two books authored by Mark Twain. Finally, the `nscrabble()` deserves an honorary mention, which computes the Scrabble letter value of text, such as the word "quanteda", clearly beating that of "tm", another text analysis package in R: 
+
+```{r quanteda scrabble, eval=TRUE, echo=TRUE}
+nscrabble(c("quanteda", "tm"))
+```
+
+
+## Downloading text from *gutenbergr*
+There are multiple ways of obtaining text for quantitative analysis, such as via an URL or using files in various formats with the `readtext()` command (which is discussed in Chapter 5). Instead, being interested in book text as an example, we use the *gutenbergr* package here. It allows for the download of the full text of books for which the copyright has expired, as in the case of the works written by Mark Twain. 
+
+```{r twain_in, eval=TRUE, echo=TRUE, comment=FALSE}
+library(gutenbergr)
+gutenberg_works(author=="Twain, Mark")
+```
+
+From the list retrieved with `gutenberg_works()`, searching for the author Mark Twain, we can identify the ids of the two works "The Adventures of Tom Sawyer" (id 74, published in 1876) and "Adventures of Huckleberry Finn" (id 76, published in 1884). We load the full text of these two into R with the `gutenberg_download()` command, creating the R object 'twain' containing the full text of the book lines as character string. 
+
+```{r gutenbergr_twain, eval=TRUE, echo=TRUE, warning=FALSE}
+twain <- gutenberg_download(c(74,76))
+head(twain)
+```
+
+This returns a *tibble* -- gutenbergr works within the *tidyverse* philosophy (see above). By using the command `head(twain)`, we get the first six rows of the tibble, which features the variables "gutenberg_id" and "text". The latter is divided into the actual lines of the book, which reflects one fundamental principle in quantiative text analysis: keep original text as intact as possible, as even the formatting can carry information of interest. Among the first lines are a few empty ones, the title of the book in upper letters, the pseudonym of the author (Mark Twain) and his birth name (Samuel Langhore Clemens). We will later transform the units to chapters and perform some basic quantitative text analysis with quanteda below.  
+
+While we will turn to *quanteda* later, consider the "tidy" way example of creating a document-feature matrix with stopword removed and visualising the most common words in the two books using *tidyverse* for a moment. This could be done directly (after installing the *tidyverse* and *tidytext* packages and following Silge and Robinson 2017: Chapter 1) by these commands (which utilize the operators `%>%` popular in tidyverse, where 'a %>% b' implies that the operations are executed sequentially): 
+
+```{r tidyverse_dfm, eval=TRUE, echo=TRUE, warning=FALSE}
+library(tidyverse)
+library(tidytext)
+twain_tidy <- twain %>%
+  unnest_tokens(word, text) %>% 
+  anti_join(stop_words)
+head(twain_tidy)
+```
+
+The *tidytext* commands utilized are `unnest_tokens()` to get the words of the text and `anti_join()` for the removal of stopwords (such as "the", "and" or "or"). In a further step, we use the `count()` command to enumerate the words from the respective books in the reduced word-level *tibble*: 
+
+```{r tidyverse_words_tom, eval=TRUE, echo=TRUE, warning=FALSE}
+twain_tidy[twain_tidy$gutenberg_id==74,] %>%
+  count(word, sort=TRUE)
+```
+
+```{r tidyverse_words_huck, eval=TRUE, echo=TRUE, warning=FALSE}
+twain_tidy[twain_tidy$gutenberg_id==76,] %>%
+  count(word, sort=TRUE)
+```
+
+We note that "Tom" is the most frequent word in Tom Sawyer's adventures, while "Huck" is surprisingly mentioned more frequently there as well rather than in his own story. Also, Tom Sawyer is much about "boy(s)", but also "Becky", the main female character. In Huckleberry Finn, the story revolves about "Jim", an enslaved man seeking freedom and Huck's friend, and also two thugs called "King" and "Duke" whom Huck and Jim have to deal with. Huckleberry Finn also contains the offensive word "nigger", which is explained by the historical context the book is written in. We will return to the use of the term for some analysis. 
+
+Regarding simple visualisation, Silge and Robinson (2017: 6) propose a way of plotting the most frequent words, here of the two books together: 
+
+```{r tidyverse_ggplot2, eval=TRUE, echo=TRUE, warning=FALSE}
+twain_tidy %>%
+  count(word, sort=TRUE) %>%
+  filter(n>160) %>%
+  mutate(word=reorder(word, n)) %>%
+  ggplot(aes(word, n)) +
+  geom_col() +
+  xlab(NULL) +
+  coord_flip()
+```
+
+The method, still part of a quick detour via the *tidytext* package, uses a number of several *tidyverse* commands such as 'ggplot()' for aesthetic plotting. While we are not going into full detail here (see Silge and Robinson 2017), note that the `filter()` command manipulates the minimum frequency of words to be included in the plot.  
+
+---
+*Quiz*:
+1. What could "warn't", "de" and "en" mean?  
+2. Why is the offensive word "nigger", which appears 157 times in Huck, displayed in the plot despite `filter(n>160)`?
+---
+
+
+## Creating a corpus() with quanteda 
+We now return from the detour via *tidyverse* back to the *quanteda* ways. Instead of going from a *tibble*, we now create a *quanteda* corpus using the `corpus()` command: 
+
+```{r corpus_quant, eval=TRUE, echo=TRUE}
+corpus_twain <- corpus(twain)
+summary(corpus_twain, n=12)
+```
+
+This creates the *corpus* 'corpus_twain' and provides text names in the variable "Text", which are now again the lines of the book as in the original tibble `twain`. The "Types" variable contains the number of unique features, here words, in each text line of the book. "Tokens" are the absolute numbers of words, which happen to equal the number of types in the first 11 lines, but not line 12 (14 words, one of them used twice, creating 13 types). The "Sentences" variable infers the number of sentences from punctuation marks. To see a text, which comes in short snippets here, and explore for instance why text12 counts towards two sentences, we can access the texts in the corpus by: 
+
+```{r corpus_text, eval=TRUE, echo=TRUE}
+texts(corpus_twain)[12]
+```
+
+The text of line 12 appears to be taken from the register, featuring the Chapter name and a short summary of the content of the chapter. Only a full stop is counted as separating sentences, not the dashes, which should be noted as this is a conceptual and consequential question. The alternative for displaying the content of text number 12 would be: 
+
+```{r corpus_text_alt, eval=TRUE, echo=TRUE}
+corpus_twain$documents$texts[12]
+```
+
+But the authors of quanteda advise against the use of this -- maybe more familiar -- direct access on [quanteda.io](quanteda.io), as "[a] corpus currently consists of an S3 specially classed list of elements, but you should not access these elements directly. Use the extractor and replacement functions instead, or else your code is not only going to be uglier, but also likely to break should the internal structure of a corpus object change (as it inevitably will as we continue to develop the package, including moving corpus objects to the S4 class system)." Obviously, 'corpus()' has further, powerful features, such as the definition of the field in the input file containing the text names (option 'docnames'), which are discussed in Chapter 5. 
+
+---
+Quiz: 
+1. Can the number of types exceed the number of tokens? 
+2. What will happen in a few years if you call internal values of a quanteda corpus directly? 
+---
+
+
+## Document-level variables 
+Now the corpus is loaded, we can make it more powerful. For a start, the corpus `twain` inherits a document-level variable from the original tibble, "gutenberg_id". Document-level variables provide information at the text level. We can create further document-level variables, in this case names for the books, using the `docvars()` command: 
+
+```{r corpus_docvar_head, eval=TRUE, echo=TRUE}
+corpus_twain[["book"]] <- "tom"
+docvars(corpus_twain, "book")[corpus_twain$documents$gutenberg_id==76] <- "huck"
+head(docvars(corpus_twain))
+```
+
+```{r corpus_docvar_tail}
+tail(docvars(corpus_twain))
+```
+Note that this does not follow the advice not to access variables directly. 
+
+
+## Creating a corpus consisting of chapters 
+While the actual lines of a book -- as extracted thus far -- are a unit of text of interest for some questions, we might prefer the book or chapter level. To transform the level of aggregation, we need a quanteda command and a way to identify the new units. If we start from documents, and the desired units are sentences or paragraphs, the `corpus_reshape()` command does the job. To go from sentences to chapters, a document-level variable indicating the respective chapter would suffice, which does not exist, though. We use a regular expression (fondly called "regex" by its fans) and the `corpus_segment` command instead, which segments the text on expressions provided, such as the word "CHAPTER" here. This requires to aggregate the book lines to books first, using the original `corpus()` command and aggregating the 'texts' of "corpus_twain" by the document-level variable "book" created above: 
+
+```{r to_books}
+corpus_twain_books <- corpus(texts(corpus_twain, groups = "book"))
+summary(corpus_twain_books, n=12)
+```
+
+We learn that Huck is more verbose than Tom, which might be related to the fact that the latter book has been published a few years before the former. Then, on these books, we can use the `corpus_segment()` command looking for the expression "CHAPTER" to split the books up again for every instance of its appearance. 
+
+```{r to_chapters}
+corpus_twain_chapters <- corpus_segment(corpus_twain_books, pattern = "CHAPTER")
+summary(corpus_twain_chapters, n=12)
+```
+
+This creates some pseudo-chapters from the register, where "CHAPTER" is also used. We will go into more detail regarding text cleaning in Chapter 5. With the chapters of the book, a classification exercise will be performed as well (see Chapter 7). For now, a quick look at the amount of text (tokens = words) in the chapters reported (using `ntoken()`) lets us infer that entry 43 is the first real chapter for Huckleberry Finn, and entry 35 for Tom Sawyer (where entries 39 and 58 are suspicious), and we can exclude the pseudo-chapters based on this with `corpus_subset()` because it is unlikely that a chapter contains only 16 words: 
+
+```{r subset}
+ntoken(corpus_twain_chapters)
+corpus_twain_realchapters <- corpus_subset(corpus_twain_chapters, ntoken(corpus_twain_chapters) > 100)
+summary(corpus_twain_realchapters, n=12)
+
+```
+
+To provide an example of the easier 'corpus_reshape' command, consider the way from books (documents) to sentences: 
+
+```{r to_sentences}
+corpus_twain_sentences <- corpus_reshape(corpus_twain_books, to = "sentences")
+summary(corpus_twain_sentences, n = 12)
+```
+
+We learn that the two books consist of almost 11k sentences. The `corpus_reshape()` command also works for the document and paragraph level. 
+
+
+## Assessing the context of words using kwic()
+
+A helpful tool for the exploration of texts is the `kwic()` function ([quanteda.io](http://quanteda.io/reference/kwic.html)). It returns the immediate context of keywords or phrases. For the context of the word "Jim", who is Huck's friend, we use: 
+
+```{r kwic_jim}
+head(kwic(corpus_twain_realchapters, "jim"), window = 4)
+```
+
+The command uses the option "window=4", which sets the number of words to be displayed before and after the keyword we are looking for. The default is 5. The method can be used for analytical and validation purposes. For instance, consider the offensive word "nigger". We could investigate the context (7 words before and after) of its use by: 
+
+```{r kwic_nigger}
+head(kwic(corpus_twain_realchapters, "nigger", window=7))
+```
+
+It is also possible to search for the context of phrases using the `phrase()` option. To learn about all instances where Becky Thatcher is called by her full name, use: 
+
+```{r kwic_becky}
+kwic(corpus_twain_realchapters, pattern = phrase("becky thatcher"), window=6)
+```
+
+---
+*Exercises*
+1. `kwic()` for for the first 10 instances of Polly, Duke and King, setting the window to 4 
+2. What could "warn't", "de" and "en" mean? Try `kwic()` to find out. 
+---
+
+
+## Creating a document-feature matrix 
+Often, the advanced quantitative analysis of texts relies on the distribution of words across them. To this end, we create a word frequency matrix, which is called document-feature matrix ("dfm", not to be confused with a data frame) in quanteda. The word "feature" is used as it could describe something different than words, say emoticons used in Tweets. The `dfm()` command could be applied on a corpus at any level of aggregation, but we use "corpus_twain_books" for the document-level variables it arrives with. We could also use 'corpus_twain_realchapters', as it contains a somewhat cleaner version of the texts, but it lacks a document-level variable identifying the book. 
+
+```{r twain_dfm}
+twain_dfm <- dfm(corpus_twain_books)
+head(twain_dfm, nf = 10)
+```
+
+Apparently, if we look at the first twelve features, "twain_dfm" still contains stopwords and punctuation, and we can remove them while reading the data in by: 
+
+```{r twain_dfm_stop}
+twain_dfm_trim <- dfm(corpus_twain_books, remove = stopwords(language = "en"),
+                 remove_punct = TRUE)
+head(twain_dfm_trim, nf = 10)
+```
+
+To remove single words, such as "contents", we could extent the list in "remove": 
+
+```{r twain_dfm_stop_more}
+twain_dfm_trim2 <- dfm(corpus_twain_books, remove = c(stopwords(language = "en"),"contents"),
+                 remove_punct = TRUE)
+head(twain_dfm_trim2, 6, nf = 10)
+```
+
+Note that `dfm()` plays nicely with `corpus()`, and for instance inherits document-level variables, if there are any. Also, `dfm()` internally "tonekizes" text, which means the extraction of features. The quanteda command `tokenize()` and its variants are powerful alternative tools for direct tokenization. 
+
+
+## Some Bag-Of-Words Descriptive Analysis
+
+With the *dfm* and its count of words across documents, we can go some way in analysing text as data. While the position of words is lost, representing a bag-of-words approach, the relative frequency of words can be used for classification or scaling purposes (e.g. using `textmodel_wordfish()`) as discussed in detail in Chapters 7 and 8. Word frequencies are also useful for descriptive purposes. To reproduce the plot of the most frequent words in the two books as performed using tidytext above, quanteda's `dfm()` lends itself well for plotting with *ggplot2*, even though it does not produce a *tibble*. Apparently, the differences between tidyverse and quanteda are not insurmountable.  
+
+Word frequencies in the single books (here for Tom) are returned with the `textstat_frequency()` command after adding a document-level variable "book", applied on "twain_dfm_trim" where stopwords and punctuation have been removed: 
+
+```{r frequ books}
+docvars(twain_dfm_trim, "book") <- c("huck","tom")
+twain_frequ <- textstat_frequency(twain_dfm_trim, groups = "book")
+twain_frequ[twain_frequ$group=="tom"][1:10,]
+```
+
+To get the most frequent features in the books, we can also use the `topfeatures()` command: 
+
+```{r topfeat}
+topfeatures(twain_dfm_trim, groups = "book", n = 20)
+```
+
+
+For a plot using the tidyverse plotting paradigma `ggplot()`, displaying the 20 most heavily used words across both books: 
+
+```{r quanteda_frequent}
+library("ggplot2")
+ggplot(twain_frequ[1:20,], aes(x = reorder(feature, frequency), y = frequency)) +
+    geom_point() +
+    coord_flip() +
+    labs(x = NULL, y = "Frequency")
+```
+
+A book-specific plot of relative word usage is generated by: 
+
+```{r book-specific}
+twain_dfm_wfreq <- twain_dfm_trim %>%
+  dfm_group(groups = "book") %>%
+  dfm_weight(scheme = "prop")
+
+relfreq <- textstat_frequency(twain_dfm_wfreq, n = 12, groups = "book")
+
+ggplot(data = relfreq, aes(x = nrow(relfreq):1, y = frequency)) +
+  geom_point() +
+  facet_wrap(~ group, scales = "free") +
+  coord_flip() +
+  scale_x_continuous(breaks = nrow(relfreq):1,
+                     labels = relfreq$feature) +
+  labs(x = NULL, y = "Relative frequency")
+```
+
+To display frequencies, we can use: 
+
+```{r}
+relfreq_all <- textstat_frequency(twain_dfm_wfreq, groups = "book")
+relfreq_all$frequency[relfreq_all$feature=="huck"&relfreq_all$group=="huck"]
+relfreq_all$frequency[relfreq_all$feature=="huck"&relfreq_all$group=="tom"]
+relfreq_all$frequency[relfreq_all$feature=="jim"&relfreq_all$group=="huck"]
+relfreq_all$frequency[relfreq_all$feature=="jim"&relfreq_all$group=="tom"]
+```
+
+
+## A Wordcloud of Tom Sawyer and Huckleberry Finn 
+
+Wordclouds might be pie charts of quantitative text analysis: often requested and highly misleading. Nevertheless, some variants can be useful for descriptive purposes. For instance, to get a quick illustration of the main story in Tom and Huck, we can use the `textplot_wordcloud()` command: 
+
+```{r wordcloud_comp}
+twain_dfm_books <- 
+  dfm(corpus_twain, remove = c(stopwords("english"),"said","got","says"), remove_punct = TRUE, groups = "book") %>%
+  dfm_trim(min_termfreq = 5)
+
+textplot_wordcloud(twain_dfm_books, comparison = TRUE, max_words = 80,
+                   color = c("blue","black"))
+```
+
+Obviously, Tom is more about boys and school, where Huck and Becky are important figures. Huck tells the story of Huck's (whose name is seldomly called) friendship with Jim, who is trying to escape slavery and travels with him down the river, traces of which can be found in the wordcloud. 
+
+
+## References 
+
+Benoit K, Watanabe K, Wang H, Nulty P, Obeng A, M?ller S, Matsuo A (2018). "quanteda: An R package for the quantitative analysis of textual data." Journal of Open Source Software, 3(30), 774. doi: 10.21105/joss.00774, https://quanteda.io. 
+
+Ignatow and Mihalcea (2017): Text Mining. SAGE. 
+
+[Munzert (2014, *Zeitschrift f?r Politikwissenschaft*)](https://www.nomos-elibrary.de/10.5771/1430-6387-2014-1-2-205/big-data-in-der-forschung-big-data-in-der-lehre-ein-vorschlag-zur-erweiterung-der-bestehenden-methodenausbildung-jahrgang-24-2014-heft-1-2) 
+
+Silge and Robinson (2017): Text Mining with R. O'Reilly. 
+
+Welbers, Kasper, Wouter Van Atteveldt and Kenneth Benoit (2017): Text Analysis in R, *Communication Methods and Measures* 11(4): 245-65. 
+
+Wickham and Grolemund (2017): R for Data Science. O'Reilly. 
+
+Wickham (2014)
+
+[...]
+
