@@ -1,17 +1,3 @@
-**TASKS FOR SETUP (Don't publish until complete):**
-
-1. [ ] Fork this template into a new repository(repo) and make sure you complete following steps on the new repo.
-2. [ ] Switch on Git pages by visiting the Settings page (set Source to to `master branch`)
-2. [ ] Amend values in `_config.yml`
-3. [ ] Edit this `README.md` and update sections. See [Markdown Guide](https://guides.github.com/features/mastering-markdown/) for formatting options
-4. [ ] Check & edit `Chapter Review` Issue template under `.github/ISSUE_TEMPLATE`.
-5. [ ] Upload your chapter files. See how to [create new folders](https://github.com/KirstieJane/STEMMRoleModels/wiki/Creating-new-folders-in-GitHub-repository-via-the-browser). [Delete](https://help.github.com/en/github/managing-files-in-a-repository/deleting-files) the existing sample chapter files.
-7. [ ] Make repo public to publish.
-8. [ ] Delete this task list! 
-
-
----
-
 Social scientists have a huge opportunity to address current research problems with the rise of big data and technology. However, this opportunity comes with challenges, too – ethical, methodological and theoretical. 
 
 Lecturers also face the pedagogical challenge of bringing new people into the community, often teaching students who have disparate knowledge of and experiences with data, statistics and programming on the one hand, and social research on the other. More than ever, lecturers need pragmatic support for teaching computer scientists alongside social scientists. 
@@ -26,9 +12,9 @@ We recognise that there will be a diverse range of opinions within the community
 
 The material shared on this site is in draft form. It is free to access, read and comment on, but must not be reused without prior permission of SAGE Publishing. For further information about reuse, please contact [contracts@sagepub.co.uk](mailto:contracts@sagepub.co.uk).
 
-This is a repository for reviewing draft chapters of the book `From Social Science to Data Science`, written by Bernie Hogan. This book is under contract with, and will be published by, SAGE Publishing. 
+This is a repository for reviewing draft chapters of the book `Doing Quantitative Text Analysis with R`, written by Julian Bernauer. This book is under contract with, and will be published by, SAGE Publishing. 
 
-Full citation: Hogan, B. (forthcoming), *From Social Science to Data Science: Scaling Up Your Programming Skills in Python*, London: SAGE. Paperback ISBN: 9781529707489.
+Full citation: Bernauer, J. (forthcoming), *Doing Quantitative Text Analysis with R*, London: SAGE. Paperback ISBN: 9781526467003.
 
 ## The review process
 
